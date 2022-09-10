@@ -1,0 +1,278 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .needdiv{
+            width: 250%;
+            height: 100%;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+            position: relative;
+            margin-left:150px;
+
+        }
+    </style>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+
+    <script>
+        $( function() {
+        //   $( "#datepicker" ).datepicker();
+        $( "#datepicker" ).datepicker({
+  buttonImage: "/images/datepicker.gif"
+});
+        } );
+        </script>
+
+    <nav class="navbar navbar-expand-lg p-3" style="background:#092e55">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white fw-bold" href="{% url 'home' %}">Health Workers Protest Tracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <li>
+                <a class="nav-link text-white" href="{% url 'get-search' %}">Table</a>
+
+              </li>
+
+        </div>
+    </nav>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <link href="{% static 'css/demo.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/svgMap.css' %}" rel="stylesheet" />
+    <script src="{% static 'js/svgMap.js' %}"></script>
+
+</head>
+
+<body>
+
+ 
+
+   
+    <!-- table start from here -->
+    <div>
+
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#"></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                  </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                      
+                    </ul>
+                    Filter protests by 
+                    <a class="btn btn-primary mx-2" href="{% url 'get-search'  %}" role="button">All</a>
+                    <form class="d-flex mx-2" method="post" action="{% url 'get-search'  %}">
+                      
+                        {% csrf_token %}
+                        {{form}}
+                        <button class="btn btn-outline-success" type="submit" id="search_button" >Filter</button>
+                    </form>
+                    <form class="d-flex mx-2" method="post" action="{% url 'get-search'  %}">
+                      
+                        {% csrf_token %}
+                        <input class="form-control me-2" name="location" type="search" placeholder="Search By Location" id="search_location">
+                        <button class="btn btn-outline-success" type="submit" id="search_button" >Filter</button>
+                    </form>
+
+                </div>
+            </div>
+        </nav>
+     
+
+        <table class="table mb-5" id="mytable">
+            {% if check_var == 'NO_DATA' %}
+
+            {% else %}
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Location</th>
+                 
+                    <th scope="col">Health workers involved</th>
+
+                    <th scope="col">Trigger</th>
+
+
+                    <th scope="col">Sentiment Analysis</th>
+
+                </tr>
+            </thead>
+        {% endif %}
+            <tbody id="get_body">
+               
+                {% for i in all_data %}
+
+                <tr id=#{{i.id}}>
+                    <td>
+                        <p>
+                            <!-- <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                                 +L
+                                </a> -->
+                            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#data{{i.id}}" aria-expanded="false" aria-controls="collapseExample">
+                                  +
+                                </button>
+                        </p>
+                        
+                    
+
+                        <div class="collapse needdiv" id="data{{i.id}}">
+
+                            <div class="shadow p-3 mt-2 mb-3">
+                               
+                                <p>
+                                    <!-- <b>involved</b>
+                                    {{i.involved}} -->
+                                   
+                                    <p>
+                                        <b>Tweet URL:</b>
+                                    
+                                        <a class="btn btn-primary" href="{{i.tweet_url}}" role="button">Tweet URL</a>
+                                    </p>
+                                    
+                                    <p>
+                                        {% if  i.media_url == "No Media Available"   %}
+                                        <b>Media URL:</b>
+                                        <a class="btn btn-primary"  role="button">No Media Available</a>
+                                        {% else %}
+                                        <b>Media URL:</b>
+                                        <a class="btn btn-primary" href="{{i.media_url}}" role="button">Media URL</a>
+                                        {% endif %}
+                                    </p>
+                         
+                                
+                                    <p>
+                                        <b>Hashtags:</b>
+                                        {{i.hashtags}}
+                                    </p>
+    
+                                    
+                                    <p>
+                                        <b>Retweets count:</b>
+                                        {{i.retweets_count}}
+                                        
+                                    </p>
+    
+                                    <p>
+                                        <b>Favorites count:</b>
+                                        {{i.likes_count}}
+                                    </p>
+                                 
+                                </p>
+                        
+                        
+
+                            
+                               
+                                
+                            </div>
+
+                        </td>
+
+
+                    <td>{{ i.d_date}} </td>
+                    <td>{{ i.location}} </td>
+                   
+                    <td>{{ i.involved}} </td>
+
+
+                    <!-- <td>
+                            <a class="btn btn-primary" href="{{ i.tweet_url}}" role="button">tweet</a>
+                        </td> -->
+                    <td>{{ i.trigger_for_protest}} </td>
+
+
+                    <td>{{ i.sentimentl_analysis}} </td>
+
+                        
+                   
+                        
+
+                </tr>
+
+                
+                    
+                    {% empty %}
+                    
+                   
+                        <center>
+                       <h1>No Data Available </h1>
+                        <center>
+                   
+                   
+
+                
+                {% endfor %}
+
+
+
+            </tbody>
+        </table>
+        <style>
+            .mybutton{ margin-left: 376px;
+                
+            }
+        </style>
+
+        {% if check_var == 'NO_DATA' %}
+
+        {% else %}
+        <div class="row justify-content-center">
+            <div class="col-4 mb-5 mybutton">
+                <a class="btn btn-primary" href="{% url 'export_users_csv' %}" role="button">Download CSV</a>
+            </div>
+            
+        </div>
+        
+       {% endif %}
+      
+        <!-- <style>
+           .hidden{
+                display: none;
+           }
+       </style> -->
+              
+        </div>
+      
+
+
+        <!-- bootstrap js -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js " integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM " crossorigin="anonymous "></script>
+        <script>
+//// get location ######
+             $(function() {
+
+                $("#search_location").autocomplete({
+                        
+                    source: "{% url  'get-country' %}"
+                });
+                         
+            
+            });
+//// end
+
+            </script>
+</body>
+
+</html>

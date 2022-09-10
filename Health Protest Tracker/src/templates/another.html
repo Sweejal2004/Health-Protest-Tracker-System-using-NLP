@@ -1,0 +1,428 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>svgMap HTML demos</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <nav class="navbar navbar-expand-lg p-3" style="background:#092e55">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white fw-bold" href="{% url 'home' %}">Health Workers Protest Tracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <li>
+                <a class="nav-link text-white" href="{% url 'get-search' %}">Table</a>
+              </li>
+
+        </div>
+    </nav>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <link href="{% static 'css/demo.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/svgMap.css' %}" rel="stylesheet" />
+    <script src="{% static 'js/svgMap.js' %}"></script>
+
+</head>
+
+<body>
+
+    <div>
+        <img src="{% static 'banner/Protest.jpg'%}" class="img-fluid " alt="... " width="100%">
+    </div>
+
+    <div class="demo-wrapper">
+
+        <div class="demo-container">
+            <h2>Protest Tracker</h2>
+
+            <div id="svgMapEuroCurrency"></div>
+            <script>
+               
+
+                function add() {
+                    parentDict = {}
+                    let token = "{{csrf_token}}";
+                    $.ajax({
+                        url: "{% url 'get-data'  %}",
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": token
+                        },
+                        data: {
+
+                            'country': "India",
+
+                        },
+                        success: (data) => {
+                            if (Array.isArray(data)) {
+
+                                const search_result = document.getElementById("finaldata");
+
+                                data.forEach(company => {
+                                        an_data = {
+                                            "euro": 1,
+                                            "eurozone": 1,
+                                            "color": "#528FCC",
+                                            'location': company.location,
+                                            'trigger': company.trigger_for_protest,
+                                            'date': company.d_date,
+                                         
+                                        }
+                                        parentDict[company.code] = an_data
+
+
+
+
+
+
+
+                                    }) // end for loop
+
+
+                            } // end array   
+
+                        }, // end success
+
+                    }); // end ajax
+                  
+                    values = parentDict
+                    return values
+                }
+                values = {}
+                var svgMapEuroCurrency = new svgMap({
+                    targetElementID: 'svgMapEuroCurrency',
+
+
+
+                    data: {
+                        data: {
+                            euro: {},
+                            location: {},
+
+                        },
+                        applyData: 'euro',
+                        applyDataTo: 'location',
+
+                        values: add(),
+
+                    },
+                    colorMin: '#E2E2E2',
+                    colorMax: '#297ACC',
+                    colorNoData: '#E2E2E2',
+                    thresholdMax: 1,
+                    thresholdMin: 0,
+                    initialZoom: 3,
+                    initialPan: {
+                        x: 420,
+                        y: 50
+                    },
+                    mouseWheelZoomEnabled: true,
+                    mouseWheelZoomWithKey: true,
+                    onGetTooltip: function(tooltipDiv, countryID, countryValues) {
+                        // Geting the list of countries
+                        var countries = svgMapEuroCurrency.countries;
+
+
+
+                        // Create tooltip content element
+                        var tooltipContentElement = document.createElement('div');
+                        tooltipContentElement.style.padding = '16px 24px';
+                        // Fill content
+
+
+                        
+                        var innerHTML =
+                            '<div style="margin: 0 0 10px; text-align: center"><img src="https://cdn.jsdelivr.net/gh/hjnilsson/country-flags@latest/svg/{0}.svg" alt="" style="height: 40px; width: auto; border: 2px solid #eee"></div>'.replace(
+                                '{0}',
+                                countryID.toLowerCase()
+                            );
+
+                        innerHTML +=
+                            '<div style="min-width: 180px; font-weight: bold; margin: 0 0 15px; text-align: center">' +
+                            countries[countryID] +
+                            '</div>';
+                        if (countries[countryID] == countryValues.location) {
+                            // start from here
+                          
+                            
+
+                           
+                            innerHTML +=
+                                                '<div style="margin-bottom: 8px"><span style="color: #6d0; display: inline-block; margin-right: 4px; width: 20px; text-align: center">✔</span> Trigger :' + countryValues.trigger + '</div>';
+
+                            innerHTML +=
+                                '<div style="margin-bottom: 8px"><span style="color: #6d0; display: inline-block; margin-right: 4px; width: 20px; text-align: center">✔</span>' + countryValues.date + '</div>';
+
+                        }
+                        if (countries[countryID] != countryValues.location) {
+
+                            innerHTML +=
+                                '<div style="margin-bottom: 8px"><span style="color: #6d0; display: inline-block; margin-right: 4px; width: 20px; text-align: center">✔</span>Part of eurozone</div>';
+
+                        } else {
+                            innerHTML +=
+                                '<div style="margin-bottom: 8px; color: #aaa"><span style="color: #f03; display: inline-block; margin-right: 4px; width: 20px; text-align: center">✘</span>Not a part of eurozone</div>';
+                        }
+
+
+                        // Return element with custom content
+                        tooltipContentElement.innerHTML = innerHTML;
+                        return tooltipContentElement;
+                    }
+
+                    
+
+                });
+                
+            </script>
+        </div>
+
+
+    </div>
+    <!-- table start from here -->
+    <div>
+
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">Filter protests by </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                  </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+<!-- 
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#">India</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">China</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link">India</a>
+                        </li> -->
+                    </ul>
+                    <form class="d-flex" method="post" action="{% url 'get-search'  %}">
+                        {% csrf_token %}
+                        <input class="form-control me-2" name="location" type="search" placeholder="Search By Location" id="search_location">
+                        <button class="btn btn-outline-success" type="submit" id="search_button" >Search</button>
+                    </form>
+
+                </div>
+            </div>
+        </nav>
+     
+
+        <table class="table mb-5" id="mytable">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Type of action</th>
+                    <th scope="col">Health workers involved</th>
+
+                    <th scope="col">Trigger</th>
+
+
+                    <th scope="col">Sentiment Analysis</th>
+
+                </tr>
+            </thead>
+        
+            <tbody id="get_body">
+               
+                {% for i in all_data %}
+
+                <tr id=#{{i.id}}>
+                    <td>
+                        <p>
+                            <!-- <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                                 +L
+                                </a> -->
+                            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#data{{i.id}}" aria-expanded="false" aria-controls="collapseExample">
+                                  +
+                                </button>
+                        </p>
+                        <div class="collapse" id="data{{i.id}}">
+
+                            <div class="shadow p-3 mt-2 mb-3">
+                                <b>involved</b>
+                                <p>
+                                    {{i.involved}}
+                                </p>
+                            </div>
+
+                            <div class="shadow p-3 mt-2 mb-3">
+                                <b>Tweet URL</b>
+                                <p>
+                                    {{i.tweet_url}}
+                                </p>
+                            </div>
+
+                            <div class="shadow p-3 mt-2 mb-3">
+                                <b>Size of Protest</b>
+                                <p>
+                                    {{i.size_of_protest}}
+                                </p>
+
+                                <b>Duration</b>
+                                <p>
+                                    {{i.duration}}
+                                </p>
+
+
+
+                            </div>
+                            <div class="shadow p-3 mt-2 mb-3">
+                                <b>Image Videos</b>
+                                <p>
+                                    <img src=" {{i.image_videos.url}}" alt="" width="300px" height="300px">
+
+                                </p>
+                            </div>
+
+                            <div class="shadow p-3 mt-2 mb-3">
+                                <b>hashtags</b>
+                                <p>
+                                    {{i.hashtags}}
+                                </p>
+
+                                <b>retweets_count</b>
+                                <p>
+                                    {{i.retweets_count}}
+                                </p>
+
+                                <b>Favorites</b>
+                                <p>
+                                    {{i.likes_count}}
+                                </p>
+                            </div>
+
+
+                    </td>
+
+
+                    <td>{{ i.d_date}} </td>
+                    <td>{{ i.location}} </td>
+                    <td>{{ i.type_of_action}} </td>
+                    <td>{{ i.involved}} </td>
+
+
+                    <!-- <td>
+                            <a class="btn btn-primary" href="{{ i.tweet_url}}" role="button">tweet</a>
+                        </td> -->
+                    <td>{{ i.trigger_for_protest}} </td>
+
+
+                    <td>{{ i.sentimentl_analysis}} </td>
+
+
+
+                </tr>
+
+
+
+                {% endfor %}
+
+
+
+            </tbody>
+        </table>
+       <!-- <style>
+           .hidden{
+                display: none;
+           }
+       </style> -->
+              
+        </div>
+      
+
+
+        <!-- bootstrap js -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js " integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM " crossorigin="anonymous "></script>
+        <script>
+//// get location ######
+             $(function() {
+
+                $("#search_location").autocomplete({
+                        
+                    source: "{% url  'get-country' %}"
+                });
+                         
+            
+            });
+//// end
+
+////  get search_result
+// $(document).ready(function(){
+
+//     $("#search_button").click(function (e) {
+//     e.preventDefault();
+        
+//         let location=$('#search_location').val();
+//         console.log(location);
+//         let token = "{{csrf_token}}";
+
+//         var  search_result = document.getElementById("searchlist");
+//         var  get_body = document.getElementById("mytable");
+        
+
+//         let url="{% url 'get-search' %}"
+
+//         $.ajax({
+//             url: url,
+//             method:"POST",
+//             headers: { "X-CSRFToken": token },
+//             data: {
+//                 'location':location,
+            
+//             },
+//             success: function (data) {
+//                 console.log(data)
+//                 $('#table').hide();    
+               
+                
+//                 data.forEach(function (element) {
+                
+//                     search_result = `<tr>
+//                             <td>${element.d_date}</td>
+//                             <td>${element.location}</td>
+//                             <td>${element.type_of_action}</td>
+//                             <td>${element.trigger_for_protest}</td>
+//                             <td>${element.sentimentl_analysis}</td>
+//                         </tr>`
+//                 });
+                
+//                 $(search_result).appendTo(search_result);
+               
+                
+//             }//success function end
+//             });//ajax function end
+//             });//click function end
+
+
+// });//main script end
+
+
+            </script>
+</body>
+
+</html>

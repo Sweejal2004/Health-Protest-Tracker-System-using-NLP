@@ -1,0 +1,536 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    
+    <!-- JQUERY CDNS -->
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- JQUERY UI CDNS -->
+
+    <!-- MAP HEAD -->
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <link href="{% static 'css/demo.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/svgMap.css' %}" rel="stylesheet" />
+    <script src="{% static 'js/svgMap.js' %}"></script>
+  <!-- END MAP HEAD -->
+
+<style>
+    .mainptrn{
+        font-size: 25px;
+    }
+    .tbl{
+        font-size: 20px;
+    }
+</style>
+  <!-- NAVBAR START FORM HERE -->
+
+  <nav class="navbar navbar-expand-lg p-3" style="background:#092e55">
+    <div class="container-fluid">
+        <a class="navbar-brand text-white fw-bold mainptrn" href="{% url 'home' %}">Health Workers Protest Tracker</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <ul>
+            <li>
+                <a class="nav-link text-white mt-1 tbl" href="{% url 'get-search' %}">Table</a>
+              </li>
+
+          </ul>
+        
+
+    </div>
+</nav>
+
+
+<!-- NAVBAR END HERE -->
+
+
+</head>
+  <body>
+    
+        <!-- ALL MAP START FROM HERE  -->
+        <div class="container">
+        
+            <div id="carouselExampleIndicators" class="carousel slide mt-3 mb-3 shadow" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                  <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                  <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                  <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                </div>
+                <div class="carousel-inner">
+                  <div class="carousel-item active">
+                    <img src="{% static 'banner/Protest.jpg'%}" class="d-block w-100" alt="...">
+                  </div>
+                  <div class="carousel-item">
+                    <img src="{% static 'banner/image4.jpg'%}" class="d-block w-100" alt="...">
+                  </div>
+                  <div class="carousel-item">
+                    <img src="{% static 'banner/image3.jpg'%}" class="d-block w-100" alt="...">
+                  </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Next</span>
+                </button>
+              </div>
+   
+              <style>
+                    #sme {
+                    width: 400px;
+                    animation: rotatebox 2s ease forwards;
+                    animation-play-state: paused;
+                    }
+
+                    #sme:hover {
+                    animation-play-state: running;
+                    }
+
+                    @keyframes rotatebox {
+                    100% {
+                        transform: rotate(180deg);
+                    }
+                    }
+              </style>
+        
+                
+                    <h2>Data Visulisation on Interactive MAP</h2>
+        
+                    <div id="svgMapEuroCurrency" class="shadow mb-5"></div>
+                    <script>
+
+                    function add() {
+                    parentDict = {}
+                    let token = "{{csrf_token}}";
+                    $.ajax({
+                        url: "{% url 'get-data'  %}",
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": token
+                        },
+                        data: {
+
+                            'country': "India",
+
+                        },
+                        success: (data) => {
+                            if (Array.isArray(data)) {
+
+                                const search_result = document.getElementById("finaldata");
+
+                                data.forEach(company => {
+                                        an_data = {
+                                            "euro": 1,
+                                            "eurozone": 1,
+                                            "color": "#528FCC",
+                                            'location': company.location,
+                                            'trigger': company.trigger_for_protest,
+                                            'date': company.d_date,
+                                         
+                                        }
+                                        parentDict[company.code] = an_data
+
+                                    }) // end for loop
+
+
+                            } // end array   
+
+                        }, // end success
+
+                    }); // end ajax
+                  
+                    values = parentDict
+                    return values
+                }
+
+
+                        var svgMapEuroCurrency = new svgMap({
+                            targetElementID: 'svgMapEuroCurrency',
+                            data: {
+                                data: {
+                                    location:{
+                                        name:"location"
+                                    },
+                                    
+                                    euro: {
+                                        name:"euro"
+                                    }
+                                },
+                                applyData: 'euro',
+                                values: add(),
+                            },
+                            colorMin: '#E2E2E2',
+                            colorMax: '#297ACC',
+                            colorNoData: '#E2E2E2',
+                            thresholdMax: 1,
+                            thresholdMin: 0,
+                            initialZoom: 3,
+                            initialPan: {
+                                x: 420,
+                                y: 50
+                            },
+                            mouseWheelZoomEnabled: true,
+                            mouseWheelZoomWithKey: true,
+                            onGetTooltip: function(tooltipDiv, countryID, countryValues) {
+                                // Geting the list of countries
+                                var countries = svgMapEuroCurrency.countries;
+        
+                                // Create tooltip content element
+                                var tooltipContentElement = document.createElement('div');
+                                tooltipContentElement.style.padding = '16px 24px';
+        
+                                // Fill content
+                                var innerHTML =
+                                    '<div style="margin: 0 0 10px; text-align: center"><img src="https://cdn.jsdelivr.net/gh/hjnilsson/country-flags@latest/svg/{0}.svg" alt="" style="height: 40px; width: auto; border: 2px solid #eee"></div>'.replace(
+                                        '{0}',
+                                        countryID.toLowerCase()
+                                    );
+        
+                                innerHTML +=
+                                    '<div style="min-width: 180px; font-weight: bold; margin: 0 0 15px; text-align: center">' +
+                                    countries[countryID] +
+                                    '</div>';
+                                
+                                if (countryValues && countryValues.location == countries[countryID]){
+                                    $("#onabout").one("mouseover", function() {
+                                        $("#onabout ul").addClass('permahover');
+                                        }); 
+                                    
+                                values1=newadd() 
+                                
+                                //   TRIGGER 
+                                function newadd() {
+                                                        parentDict = []
+                                                        let token = "{{csrf_token}}";
+                                                        $.ajax({
+                                                            url: "{% url 'get-card-data'  %}",
+                                                            method: "POST",
+                                                            headers: {
+                                                             "X-CSRFToken": token
+                                                            },
+                                                            data: {
+
+                                                                'country': countryValues.location,
+
+                                                         },
+                                                         success: (data) => {
+                                                                if (Array.isArray(data)) {
+
+                                                                    data.forEach(company => {
+
+                                                                        data={
+                                                                            "date": company.d_date,
+                                                                            "name":company.involved,
+                                                                            "trigger": company.trigger_for_protest,
+                                                                           
+                
+
+                                                                        }
+                                                                        
+                                                                                                                                
+                                                                        // ${key}: ${data[key]}
+                                                                        for (var key in data) {
+                                                                            // check if the property/key is defined in the object itself, not in parent
+                                                                            console.log(key[0,5])
+                                                                        innerHTML +=`
+                                                                        <div id="sme">  
+                                                                            
+                                                                                
+                                                                                <span class="badge bg-secondary">${key}</span></h6>
+                                                                                ${data[key]}
+
+                                                                        
+                                                                        </div>  `                                                                            
+                                                                        }                                                                      
+                                                                        
+                                                                        parentDict.push(data)
+                                                                        
+
+                                                                        tooltipContentElement.innerHTML = innerHTML;
+                                                                        return tooltipContentElement;    
+                                                                        
+                                                                        })
+                                                                        
+                                                                        // end for loop
+
+
+                                                                } // end array   
+
+                                                            }, // end success
+
+                                                        }); // end ajax
+                  
+                                                        values1 = parentDict
+                                                        return values1
+                                                    }
+                                // END TRIGGER
+                                    
+                                
+
+                                }
+                                else{
+                                    innerHTML +=
+                                    '<div style="min-width: 180px; font-weight: bold; margin: 0 0 15px; text-align: center">' + "No Protest" +
+                                    '</div>';
+                                }
+
+                                       
+
+                                
+        
+                                // Return element with custom content
+                               
+                                
+                                tooltipContentElement.innerHTML = innerHTML;
+                                return tooltipContentElement;
+                            }
+                        });
+                    </script>
+                </div>
+         
+        </body>
+        
+        </html>
+
+
+        <!-- ALL MAP END HERE -->
+
+        
+        <!-- table start from here -->
+
+        <style>
+            .needdiv{
+                width: 250%;
+                height: 100%;
+                background-color: #f2f2f2;
+                border-radius: 5px;
+                padding: 20px;
+                margin-top: 20px;
+                position: relative;
+                margin-left:150px;
+    
+            }
+        </style>        
+
+<div>
+
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#"></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                  </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                      
+                    </ul>
+                    Filter protests by 
+                    <a class="btn btn-primary mx-2" href="{% url 'home'  %}" role="button">All</a>
+                    <form class="d-flex mx-2" method="post" action="{% url 'home'  %}">
+                        {% csrf_token %}
+                        {{form}}
+                        <button class="btn btn-outline-success" type="submit" id="search_button" >Filter</button>
+                    </form>
+                    <form class="d-flex mx-2" method="post" action="{% url 'home'  %}">
+                        {% csrf_token %}
+                        <input class="form-control me-2" name="location" type="search" placeholder="Search By Location" id="search_location">
+                        <button class="btn btn-outline-success" type="submit" id="search_button" >Filter</button>
+                    </form>
+
+                </div>
+            </div>
+        </nav>
+     
+
+        <table class="table mb-5" id="mytable">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Location</th>
+                 
+                    <th scope="col">Health workers involved</th>
+
+                    <th scope="col">Trigger</th>
+
+
+                    <th scope="col">Sentiment Analysis</th>
+
+                </tr>
+            </thead>
+        
+            <tbody id="get_body">
+               
+                {% for i in all_data %}
+
+                <tr id=#{{i.id}}>
+                    <td>
+                        <p>
+                            <!-- <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                                 +L
+                                </a> -->
+                            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#data{{i.id}}" aria-expanded="false" aria-controls="collapseExample">
+                                  +
+                                </button>
+                        </p>
+                        
+                    
+
+                        <div class="collapse needdiv" id="data{{i.id}}">
+
+                            <div class="shadow p-3 mt-2 mb-3">
+                               
+                                <p>
+                                    <!-- <b>involved</b>
+                                    {{i.involved}} -->
+                                   
+                                    <p>
+                                        <b>Tweet URL:</b>
+                                    
+                                        <a class="btn btn-primary" href="{{i.tweet_url}}" role="button">Tweet URL</a>
+                                    </p>
+                                    
+                                    <p>
+                                        {% if  i.media_url == "No Media Available"   %}
+                                        <b>Media URL:</b>
+                                        <a class="btn btn-primary"  role="button">No Media Available</a>
+                                        {% else %}
+                                        <b>Media URL:</b>
+                                        <a class="btn btn-primary" href="{{i.media_url}}" role="button">Media URL</a>
+                                        {% endif %}
+                                    </p>
+                         
+                                
+                                    <p>
+                                        <b>Hashtags:</b>
+                                        {{i.hashtags}}
+                                    </p>
+    
+                                    
+                                    <p>
+                                        <b>Retweets count:</b>
+                                        {{i.retweets_count}}
+                                        
+                                    </p>
+    
+                                    <p>
+                                        <b>Favorites count:</b>
+                                        {{i.likes_count}}
+                                    </p>
+                                 
+                                </p>
+                        
+                        
+
+                            
+                               
+                                
+                            </div>
+
+                        </td>
+
+
+                    <td>{{ i.d_date}} </td>
+                    <td>{{ i.location}} </td>
+                   
+                    <td>{{ i.involved}} </td>
+
+
+                    <!-- <td>
+                            <a class="btn btn-primary" href="{{ i.tweet_url}}" role="button">tweet</a>
+                        </td> -->
+                    <td>{{ i.trigger_for_protest}} </td>
+
+
+                    <td>{{ i.sentimentl_analysis}} </td>
+
+                   
+                        
+
+                </tr>
+                        
+                    {% empty %}
+                        
+                    
+                        <center>
+                        <h1> No Data Available </h1>
+                        <center>
+                    
+                
+                
+                {% endfor %}
+
+
+
+            </tbody>
+        </table>
+        <style>
+            .mybutton{ margin-left: 376px;
+                
+            }
+        </style>
+        {% if check_var == 'NO_DATA' %}
+
+        {% else %}
+        <div class="row justify-content-center">
+            <div class="col-4 mb-5 mybutton">
+                <a class="btn btn-primary" href="{% url 'export_users_csv' %}" role="button">Download CSV</a>
+            </div>
+            
+        </div>
+        
+        {% endif %}
+      
+        <!-- <style>
+           .hidden{
+                display: none;
+           }
+       </style> -->
+              
+        </div>
+      
+
+        <!-- table end here -->
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+<script>
+            //// get location ######
+                         $(function() 
+                        {
+                             $("#search_location").autocomplete({
+                                 source: "{% url  'get-country' %}"
+                                                                });                       
+                                        
+                        });
+            //// end
+            
+</script>
+
+
+    
+            <!-- bootstrap js -->
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    -->
+  </body>
+</html>
